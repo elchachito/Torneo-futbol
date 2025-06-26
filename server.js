@@ -41,3 +41,19 @@ app.get('/api/torneos/:id', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
 });
+const fs = require('fs');
+const path = require('path');
+
+app.get('/:id', (req, res) => {
+  const filePath = path.join(__dirname, 'views', 'index.html');
+  fs.readFile(filePath, 'utf8', (err, html) => {
+    if (err) {
+      res.status(500).send('Error al cargar el torneo');
+      return;
+    }
+
+    // Reemplaza el marcador {{ID}} por el id de la URL
+    const rendered = html.replace('{{ID}}', req.params.id);
+    res.send(rendered);
+  });
+});
