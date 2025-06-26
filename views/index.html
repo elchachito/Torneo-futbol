@@ -39,19 +39,31 @@
 
       const equipos = equiposTexto.split("\n").map(e => e.trim()).filter(e => e.length > 0);
 
-     const res = await fetch("https://torneo-futbol-production.up.railway.app/api/torneos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, equipos }),
-      });
+      try {
+        const res = await fetch("https://torneo-futbol-production.up.railway.app/api/torneos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nombre, equipos }),
+        });
 
-      if (res.ok) {
-        const data = await res.json();
-        resultado.innerHTML = `<p><strong>¡Torneo creado!</strong></p>
-        <div class="link">${data.enlace}</div>`;
-      } else {
-        const error = await res.json();
-        resultado.innerHTML = `<p style="color: red;">Error: ${error.error}</p>`;
+        if (res.ok) {
+          const data = await res.json();
+
+          // ✅ Guardar torneo en localStorage
+          localStorage.setItem("torneo_guardado", JSON.stringify({
+            nombre,
+            equipos,
+            enlace: data.enlace
+          }));
+
+          resultado.innerHTML = `<p><strong>¡Torneo creado!</strong></p>
+          <div class="link">${data.enlace}</div>`;
+        } else {
+          const error = await res.json();
+          resultado.innerHTML = `<p style="color: red;">Error: ${error.error}</p>`;
+        }
+      } catch (err) {
+        resultado.innerHTML = `<p style="color: red;">Error de red: ${err.message}</p>`;
       }
     });
   </script>
