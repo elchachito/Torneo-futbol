@@ -13,6 +13,14 @@
 </head>
 <body>
   <h1>Crear Torneo</h1>
+
+  <div id="torneo-guardado" style="display:none;">
+    <p><strong>¡Tienes un torneo guardado!</strong></p>
+    <div class="link" id="link-torneo"></div>
+    <button id="borrar-torneo">Borrar torneo guardado</button>
+    <hr>
+  </div>
+
   <form id="torneo-form">
     <label>Nombre del Torneo:</label>
     <input type="text" id="nombre" required />
@@ -28,6 +36,26 @@
   <script>
     const form = document.getElementById("torneo-form");
     const resultado = document.getElementById("resultado");
+    const torneoGuardadoDiv = document.getElementById("torneo-guardado");
+    const linkTorneo = document.getElementById("link-torneo");
+    const borrarBtn = document.getElementById("borrar-torneo");
+
+    // Paso 2: Mostrar torneo guardado si existe
+    function mostrarTorneoGuardado() {
+      const torneo = JSON.parse(localStorage.getItem("torneo_guardado"));
+      if (torneo) {
+        torneoGuardadoDiv.style.display = "block";
+        linkTorneo.innerHTML = `<strong>${torneo.nombre}</strong><br><a href="${torneo.enlace}" target="_blank">${torneo.enlace}</a>`;
+      } else {
+        torneoGuardadoDiv.style.display = "none";
+      }
+    }
+
+    borrarBtn.addEventListener("click", () => {
+      localStorage.removeItem("torneo_guardado");
+      mostrarTorneoGuardado();
+      resultado.textContent = "";
+    });
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -49,7 +77,7 @@
         if (res.ok) {
           const data = await res.json();
 
-          // ✅ Guardar torneo en localStorage
+          // Guardar torneo en localStorage
           localStorage.setItem("torneo_guardado", JSON.stringify({
             nombre,
             equipos,
@@ -58,6 +86,11 @@
 
           resultado.innerHTML = `<p><strong>¡Torneo creado!</strong></p>
           <div class="link">${data.enlace}</div>`;
+
+          mostrarTorneoGuardado();
+
+          // Limpia el formulario
+          form.reset();
         } else {
           const error = await res.json();
           resultado.innerHTML = `<p style="color: red;">Error: ${error.error}</p>`;
@@ -66,6 +99,9 @@
         resultado.innerHTML = `<p style="color: red;">Error de red: ${err.message}</p>`;
       }
     });
+
+    // Mostrar torneo guardado al cargar la página
+    mostrarTorneoGuardado();
   </script>
 </body>
 </html>
