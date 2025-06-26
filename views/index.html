@@ -39,7 +39,7 @@
 
       const equipos = equiposTexto.split("\n").map(e => e.trim()).filter(e => e.length > 0);
 
-      const res = await fetch("/api/torneos", {
+     const res = await fetch("https://torneo-futbol-production.up.railway.app/api/torneos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, equipos }),
