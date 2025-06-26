@@ -1,43 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Torneo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crear Torneo</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-    }
+    body { font-family: sans-serif; padding: 1rem; max-width: 600px; margin: auto; }
+    input, button, textarea { width: 100%; padding: 0.5rem; margin: 0.5rem 0; }
+    ul { padding-left: 1rem; }
+    .link { background: #f0f0f0; padding: 1rem; border-radius: 5px; word-break: break-word; }
   </style>
 </head>
 <body>
-  <h1>Torneo cargado</h1>
-  <p>ID del torneo: <strong id="torneo-id"></strong></p>
+  <h1>Crear Torneo</h1>
+  <form id="torneo-form">
+    <label>Nombre del Torneo:</label>
+    <input type="text" id="nombre" required />
+
+    <label>Equipos (uno por línea):</label>
+    <textarea id="equipos" rows="6" required></textarea>
+
+    <button type="submit">Crear</button>
+  </form>
+
+  <div id="resultado"></div>
 
   <script>
-  const id = "{{ID}}";
-  document.getElementById("torneo-id").textContent = id;
+    const form = document.getElementById("torneo-form");
+    const resultado = document.getElementById("resultado");
 
-  fetch(`/api/torneos/${id}`)
-    .then(res => {
-      if (!res.ok) throw new Error("Torneo no encontrado");
-      return res.json();
-    })
-    .then(data => {
-      const info = document.createElement("div");
-      info.innerHTML = `<h2>${data.nombre}</h2>
-        <h3>Equipos:</h3>
-        <ul>${data.equipos.map(e => `<li>${e}</li>`).join("")}</ul>`;
-      document.body.appendChild(info);
-    })
-    .catch(err => {
-      const errorMsg = document.createElement("p");
-      errorMsg.textContent = "Error: " + err.message;
-      errorMsg.style.color = "red";
-      document.body.appendChild(errorMsg);
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const nombre = document.getElementById("nombre").value.trim();
+      const equiposTexto = document.getElementById("equipos").value.trim();
+
+      if (!nombre || !equiposTexto) return;
+
+      const equipos = equiposTexto.split("\n").map(e => e.trim()).filter(e => e.length > 0);
+
+      const res = await fetch("/api/torneos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre, equipos }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        resultado.innerHTML = `<p><strong>¡Torneo creado!</strong></p>
+        <div class="link">${data.enlace}</div>`;
+      } else {
+        const error = await res.json();
+        resultado.innerHTML = `<p style="color: red;">Error: ${error.error}</p>`;
+      }
     });
-</script>
+  </script>
 </body>
 </html>
