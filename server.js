@@ -1,53 +1,46 @@
-const express = require('express');
+const express = require("express");
 const app = express();
-const path = require('path');
-const fs = require('fs');
+const path = require("path");
+const { randomUUID } = require("crypto");
 
-const PORT = process.env.PORT || 8080;
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Servir archivos estáticos (si los necesitas)
-app.use(express.static('public'));
+// Servimos archivos estáticos si hace falta
+app.use(express.static("public"));
 
-// Ruta principal de prueba
-app.get('/', (req, res) => {
-  res.send('Servidor activo. Escribe un ID para ver el torneo.');
-});
-
-// Ruta dinámica para mostrar el torneo
-app.get('/:id', (req, res) => {
-  const filePath = path.join(__dirname, 'views', 'index.html');
-  fs.readFile(filePath, 'utf8', (err, html) => {
-    if (err) {
-      res.status(500).send('Error al cargar el torneo');
-      return;
-    }
-
-    const rendered = html.replace('{{ID}}', req.params.id);
-    res.send(rendered);
-  });
-});
-// Datos dummy para ejemplo (puedes sustituirlo por base de datos o archivo real)
-const torneos = {
-  "-abc123": {
-    nombre: "Torneo de Verano",
-    equipos: ["Equipo A", "Equipo B", "Equipo C"],
-  },
-  "-xyz789": {
-    nombre: "Torneo Invierno",
-    equipos: ["Equipo X", "Equipo Y"],
-  },
-};
-
-// Ruta API para obtener datos de torneo
-app.get('/api/torneos/:id', (req, res) => {
+// Motor para servir HTML con reemplazo de ID
+app.get("/:id", (req, res) => {
   const id = req.params.id;
-  const torneo = torneos[id];
-  if (torneo) {
-    res.json(torneo);
-  } else {
-    res.status(404).json({ error: "Torneo no encontrado" });
-  }
+  res.sendFile(path.join(__dirname, "views", "index.html"));
 });
+
+// Almacenamiento temporal en memoria (se borra al reiniciar)
+const torneos = {};
+
+// API para obtener torneo
+app.get("/api/torneos/:id", (req, res) => {
+  const torneo = torneos[req.params.id];
+  if (!torneo) return res.status(404).json({ error: "Torneo no encontrado" });
+  res.json(torneo);
+});
+
+// API para crear torneo
+app.post("/api/torneos", (req, res) => {
+  const { nombre, equipos } = req.body;
+
+  if (!nombre || !equipos || !Array.isArray(equipos)) {
+    return res.status(400).json({ error: "Datos inválidos" });
+  }
+
+  const id = "-" + randomUUID().slice(0, 6); // Tipo -a1b2c3
+  torneos[id] = { nombre, equipos };
+  console.log(`Torneo creado con ID ${id}`);
+  res.json({ enlace: `https://torneo-futbol-production.up.railway.app/${id}` });
+});
+
+// Servidor corriendo
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
 });
