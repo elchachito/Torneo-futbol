@@ -17,18 +17,27 @@
   <p>ID del torneo: <strong id="torneo-id"></strong></p>
 
   <script>
-    const id = "{{ID}}";
-    document.getElementById("torneo-id").textContent = id;
+  const id = "{{ID}}";
+  document.getElementById("torneo-id").textContent = id;
 
-    // Si quieres hacer fetch de los datos del torneo, aquí iría
-    // fetch(`https://tu-backend.com/api/torneos/${id}`)
-    //   .then(res => res.json())
-    //   .then(data => {
-    //     console.log("Datos del torneo:", data);
-    //   })
-    //   .catch(err => {
-    //     console.error("Error al cargar torneo:", err);
-    //   });
-  </script>
+  fetch(`/api/torneos/${id}`)
+    .then(res => {
+      if (!res.ok) throw new Error("Torneo no encontrado");
+      return res.json();
+    })
+    .then(data => {
+      const info = document.createElement("div");
+      info.innerHTML = `<h2>${data.nombre}</h2>
+        <h3>Equipos:</h3>
+        <ul>${data.equipos.map(e => `<li>${e}</li>`).join("")}</ul>`;
+      document.body.appendChild(info);
+    })
+    .catch(err => {
+      const errorMsg = document.createElement("p");
+      errorMsg.textContent = "Error: " + err.message;
+      errorMsg.style.color = "red";
+      document.body.appendChild(errorMsg);
+    });
+</script>
 </body>
 </html>
