@@ -1,8 +1,10 @@
 const express = require("express");
+const cors = require("cors"); // 👈 Añadido
 const app = express();
 const path = require("path");
 const { randomUUID } = require("crypto");
 
+app.use(cors()); // 👈 Habilita CORS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
