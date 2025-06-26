@@ -26,7 +26,28 @@ app.get('/:id', (req, res) => {
     res.send(rendered);
   });
 });
+// Datos dummy para ejemplo (puedes sustituirlo por base de datos o archivo real)
+const torneos = {
+  "-abc123": {
+    nombre: "Torneo de Verano",
+    equipos: ["Equipo A", "Equipo B", "Equipo C"],
+  },
+  "-xyz789": {
+    nombre: "Torneo Invierno",
+    equipos: ["Equipo X", "Equipo Y"],
+  },
+};
 
+// Ruta API para obtener datos de torneo
+app.get('/api/torneos/:id', (req, res) => {
+  const id = req.params.id;
+  const torneo = torneos[id];
+  if (torneo) {
+    res.json(torneo);
+  } else {
+    res.status(404).json({ error: "Torneo no encontrado" });
+  }
+});
 app.listen(PORT, () => {
   console.log(`Servidor escuchando en puerto ${PORT}`);
 });
