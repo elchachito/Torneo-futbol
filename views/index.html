@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Torneo</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Torneo cargado</h1>
+  <p>ID del torneo: <strong id="torneo-id"></strong></p>
+
+  <script>
+    const id = "{{ID}}";
+    document.getElementById("torneo-id").textContent = id;
+
+    // Si quieres hacer fetch de los datos del torneo, aquí iría
+    // fetch(`https://tu-backend.com/api/torneos/${id}`)
+    //   .then(res => res.json())
+    //   .then(data => {
+    //     console.log("Datos del torneo:", data);
+    //   })
+    //   .catch(err => {
+    //     console.error("Error al cargar torneo:", err);
+    //   });
+  </script>
+</body>
+</html>
