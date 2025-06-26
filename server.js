@@ -1,49 +1,19 @@
 const express = require('express');
-const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
-
 const app = express();
-const PORT = process.env.PORT || 3000;
-const APP_URL = process.env.APP_URL || 'http://localhost:' + PORT;
-
-app.use(cors());
-app.use(express.json());
-
-const torneos = {};
-
-app.post('/api/torneos', (req, res) => {
-  const { nombre, equipos } = req.body;
-  if (!nombre || !equipos || equipos.length < 2) {
-    return res.status(400).json({ error: 'Datos inválidos' });
-  }
-
-  const id = uuidv4();
-  const partidos = [];
-  for (let i = 0; i < equipos.length; i++) {
-    for (let j = i + 1; j < equipos.length; j++) {
-      partidos.push({ local: equipos[i], visitante: equipos[j], golesLocal: null, golesVisitante: null });
-    }
-  }
-
-  torneos[id] = { id, nombre, equipos, partidos, creado: new Date() };
-
-  res.json({ id, url: `${APP_URL}/torneo/${id}` });
-});
-
-app.get('/api/torneos/:id', (req, res) => {
-  const torneo = torneos[req.params.id];
-  if (!torneo) {
-    return res.status(404).json({ error: 'Torneo no encontrado' });
-  }
-  res.json(torneo);
-});
-
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en puerto ${PORT}`);
-});
-const fs = require('fs');
 const path = require('path');
+const fs = require('fs');
 
+const PORT = process.env.PORT || 8080;
+
+// Servir archivos estáticos (si los necesitas)
+app.use(express.static('public'));
+
+// Ruta principal de prueba
+app.get('/', (req, res) => {
+  res.send('Servidor activo. Escribe un ID para ver el torneo.');
+});
+
+// Ruta dinámica para mostrar el torneo
 app.get('/:id', (req, res) => {
   const filePath = path.join(__dirname, 'views', 'index.html');
   fs.readFile(filePath, 'utf8', (err, html) => {
@@ -52,8 +22,11 @@ app.get('/:id', (req, res) => {
       return;
     }
 
-    // Reemplaza el marcador {{ID}} por el id de la URL
     const rendered = html.replace('{{ID}}', req.params.id);
     res.send(rendered);
   });
+});
+
+app.listen(PORT, () => {
+  console.log(`Servidor escuchando en puerto ${PORT}`);
 });
